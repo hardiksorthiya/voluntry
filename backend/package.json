@@ -1,0 +1,31 @@
+{
+  "name": "voluntry-backend",
+  "version": "1.0.0",
+  "description": "Volunteer management backend with auth, chat, and stats",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "lint": "echo \"No linter configured\""
+  },
+  "keywords": [
+    "volunteer",
+    "express",
+    "mongo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.0.0",
+    "openai": "^6.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
