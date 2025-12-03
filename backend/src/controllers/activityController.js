@@ -1,25 +1,27 @@
 import Activity from "../models/Activity.js";
 import Attendance from "../models/Attendance.js";
 import User from "../models/User.js";
+import mongoose from "mongoose";
 
-// POST /activities - Create a new activity
+// POST /activities - Create a new activity (public, no auth required)
 export const createActivity = async (req, res) => {
   try {
-    const { title, description, date, location, slots, tags } = req.body;
+    const { title, description, date, location, slots, tags, owner } = req.body;
     
     if (!title || !date) {
       return res.status(400).json({ message: "Title and date are required" });
     }
 
+    // If owner is provided, use it; otherwise, owner is optional (can be null)
     const activity = await Activity.create({
-      owner: req.user._id,
+      owner: owner || null,
       title,
       description,
       date: new Date(date),
       location,
       slots: slots || 0,
       tags: tags || [],
-      state: "draft",
+      state: "open", // Published by default
       status: "upcoming",
     });
 
@@ -88,6 +90,12 @@ export const listActivities = async (req, res) => {
 export const getActivityById = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
+    
     const activity = await Activity.findById(id)
       .populate("owner", "name email profile.avatarUrl")
       .populate("participants.user", "name email profile.avatarUrl");
@@ -102,30 +110,44 @@ export const getActivityById = async (req, res) => {
   }
 };
 
-// PUT /activities/:id - Update activity (owner or admin only)
+// PUT /activities/:id - Update activity (public, no auth required)
 export const updateActivity = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, date, status, location, slots, tags } = req.body;
+    const { title, description, date, status, state, location, slots, tags, owner } = req.body;
+    
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
     
     const activity = await Activity.findById(id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
 
-    // Check if user is owner or admin
-    if (activity.owner.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Only owner or admin can edit this activity" });
-    }
-
     // Update fields
     if (title !== undefined) activity.title = title;
     if (description !== undefined) activity.description = description;
     if (date !== undefined) activity.date = new Date(date);
-    if (status !== undefined) activity.status = status;
+    if (status !== undefined) {
+      // Validate status
+      const validStatuses = ["upcoming", "ongoing", "completed", "cancelled"];
+      if (validStatuses.includes(status)) {
+        activity.status = status;
+      }
+    }
+    if (state !== undefined) {
+      // Validate state
+      const validStates = ["draft", "open", "closed", "cancelled"];
+      if (validStates.includes(state)) {
+        activity.state = state;
+      }
+    }
     if (location !== undefined) activity.location = location;
     if (slots !== undefined) activity.slots = slots;
     if (tags !== undefined) activity.tags = tags;
+    if (owner !== undefined) activity.owner = owner; // Allow updating owner
 
     await activity.save();
 
@@ -135,19 +157,19 @@ export const updateActivity = async (req, res) => {
   }
 };
 
-// DELETE /activities/:id - Delete activity (owner or admin only)
+// DELETE /activities/:id - Delete activity (public, no auth required)
 export const deleteActivity = async (req, res) => {
   try {
     const { id } = req.params;
     
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
+    
     const activity = await Activity.findById(id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
-    }
-
-    // Check if user is owner or admin
-    if (activity.owner.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Only owner or admin can delete this activity" });
     }
 
     // Delete related attendance records
@@ -162,11 +184,24 @@ export const deleteActivity = async (req, res) => {
   }
 };
 
-// POST /activities/:id/join - User joins activity
+// POST /activities/:id/join - User joins activity (public, no auth required)
 export const joinActivity = async (req, res) => {
   try {
     const { id } = req.params;
-    const { participants: participantsCount = 1 } = req.body;
+    const { userId, participants: participantsCount = 1 } = req.body;
+    
+    // Validate ObjectId formats
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required in request body" });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid userId format" });
+    }
     
     const activity = await Activity.findById(id);
     if (!activity) {
@@ -179,7 +214,7 @@ export const joinActivity = async (req, res) => {
 
     // Check if already joined
     const existingParticipant = activity.participants.find(
-      (p) => p.user.toString() === req.user._id.toString()
+      (p) => p.user.toString() === userId.toString()
     );
     
     if (existingParticipant) {
@@ -198,7 +233,7 @@ export const joinActivity = async (req, res) => {
 
     // Add participant
     activity.participants.push({
-      user: req.user._id,
+      user: userId,
       participantsCount,
     });
 
@@ -214,10 +249,24 @@ export const joinActivity = async (req, res) => {
   }
 };
 
-// POST /activities/:id/leave - User leaves activity
+// POST /activities/:id/leave - User leaves activity (public, no auth required)
 export const leaveActivity = async (req, res) => {
   try {
     const { id } = req.params;
+    const { userId } = req.body;
+    
+    // Validate ObjectId formats
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required in request body" });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid userId format" });
+    }
     
     const activity = await Activity.findById(id);
     if (!activity) {
@@ -226,7 +275,7 @@ export const leaveActivity = async (req, res) => {
 
     // Remove participant
     activity.participants = activity.participants.filter(
-      (p) => p.user.toString() !== req.user._id.toString()
+      (p) => p.user.toString() !== userId.toString()
     );
 
     await activity.save();
@@ -241,25 +290,28 @@ export const leaveActivity = async (req, res) => {
   }
 };
 
-// POST /activities/:id/attendance - Record attendance (manager/admin only)
+// POST /activities/:id/attendance - Record attendance (public, no auth required)
 export const recordAttendance = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId, status } = req.body;
+    const { userId, status, recordedBy } = req.body;
+    
+    // Validate ObjectId formats
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
     
     if (!userId || !status || !["present", "absent"].includes(status)) {
       return res.status(400).json({ message: "userId and status (present/absent) are required" });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid userId format" });
     }
 
     const activity = await Activity.findById(id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
-    }
-
-    // Check if user is manager or admin
-    const isOwner = activity.owner.toString() === req.user._id.toString();
-    if (!isOwner && req.user.role !== "admin" && req.user.role !== "manager") {
-      return res.status(403).json({ message: "Only manager or admin can record attendance" });
     }
 
     // Check if user is a participant
@@ -278,7 +330,7 @@ export const recordAttendance = async (req, res) => {
         activity: id,
         user: userId,
         status,
-        recordedBy: req.user._id,
+        recordedBy: recordedBy || null, // Optional: who recorded this
       },
       { upsert: true, new: true }
     ).populate("user", "name email").populate("recordedBy", "name email");
@@ -289,11 +341,16 @@ export const recordAttendance = async (req, res) => {
   }
 };
 
-// POST /activities/:id/state - Change activity state (manager/admin only)
+// POST /activities/:id/state - Change activity state (public, no auth required)
 export const changeActivityState = async (req, res) => {
   try {
     const { id } = req.params;
     const { state } = req.body;
+    
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid activity ID format" });
+    }
     
     if (!state || !["draft", "open", "closed", "cancelled"].includes(state)) {
       return res.status(400).json({ message: "Valid state (draft/open/closed/cancelled) is required" });
@@ -302,12 +359,6 @@ export const changeActivityState = async (req, res) => {
     const activity = await Activity.findById(id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
-    }
-
-    // Check if user is manager or admin
-    const isOwner = activity.owner.toString() === req.user._id.toString();
-    if (!isOwner && req.user.role !== "admin" && req.user.role !== "manager") {
-      return res.status(403).json({ message: "Only manager or admin can change activity state" });
     }
 
     activity.state = state;

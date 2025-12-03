@@ -10,22 +10,24 @@ import {
   recordAttendance,
   changeActivityState,
 } from "../controllers/activityController.js";
-import { requireAuth, requireManager } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
-// Public routes
+// All activity routes are public (no authentication required)
+// IMPORTANT: More specific routes (with sub-paths) must come BEFORE generic :id routes
 router.get("/", listActivities); // Public listing
-router.get("/:id", getActivityById); // Public activity details
+router.post("/", createActivity); // Public - create activity
 
-// Protected routes
-router.post("/", requireAuth, createActivity);
-router.put("/:id", requireAuth, updateActivity);
-router.delete("/:id", requireAuth, deleteActivity);
-router.post("/:id/join", requireAuth, joinActivity);
-router.post("/:id/leave", requireAuth, leaveActivity);
-router.post("/:id/attendance", requireAuth, requireManager, recordAttendance);
-router.post("/:id/state", requireAuth, requireManager, changeActivityState);
+// Sub-routes (must come before /:id to avoid route conflicts)
+router.post("/:id/join", joinActivity); // Public - join activity
+router.post("/:id/leave", leaveActivity); // Public - leave activity
+router.post("/:id/attendance", recordAttendance); // Public - record attendance
+router.post("/:id/state", changeActivityState); // Public - change activity state
+
+// Generic routes (must come after sub-routes)
+router.get("/:id", getActivityById); // Public activity details
+router.put("/:id", updateActivity); // Public - update activity
+router.delete("/:id", deleteActivity); // Public - delete activity
 
 export default router;
 

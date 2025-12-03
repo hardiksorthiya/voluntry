@@ -8,6 +8,10 @@ import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import ProfileUpdateScreen from './src/screens/ProfileUpdateScreen';
+import CreateActivityScreen from './src/screens/CreateActivityScreen';
+import ActivitiesScreen from './src/screens/ActivitiesScreen';
 import PlaceholderScreen from './src/screens/PlaceholderScreen';
 import API, { setToken } from './src/api';
 
@@ -98,20 +102,12 @@ export default function App() {
               </Stack.Screen>
               <Stack.Screen name="Activities">
                 {(props) => (
-                  <PlaceholderScreen
-                    {...props}
-                    title="Activities"
-                    description="Browse and join volunteer activities"
-                  />
+                  <ActivitiesScreen {...props} route={{ params: { user } }} />
                 )}
               </Stack.Screen>
               <Stack.Screen name="CreateActivity">
                 {(props) => (
-                  <PlaceholderScreen
-                    {...props}
-                    title="Create Activity"
-                    description="Create a new volunteer activity"
-                  />
+                  <CreateActivityScreen {...props} />
                 )}
               </Stack.Screen>
               <Stack.Screen name="Chat">
@@ -125,12 +121,18 @@ export default function App() {
               </Stack.Screen>
               <Stack.Screen name="Profile">
                 {(props) => (
-                  <PlaceholderScreen
+                  <ProfileScreen
                     {...props}
-                    title="Profile"
-                    description="View and edit your profile"
+                    user={user}
+                    onUserUpdate={setUser}
                   />
                 )}
+              </Stack.Screen>
+              <Stack.Screen
+                name="ProfileUpdate"
+                options={{ presentation: 'modal' }}
+              >
+                {(props) => <ProfileUpdateScreen {...props} />}
               </Stack.Screen>
               <Stack.Screen name="ActivityDetail">
                 {(props) => (

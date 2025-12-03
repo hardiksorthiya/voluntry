@@ -5,15 +5,12 @@ import {
   getUserStats,
   getDashboardStats,
 } from "../controllers/statsController.js";
-import { requireAuth, requireManager } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
-router.use(requireAuth);
-
-// New endpoints
-router.get("/overview", requireManager, getOverview);
-router.get("/activity/:id", requireManager, getActivityStats);
+// All stats endpoints are public (no authentication required)
+router.get("/overview", getOverview);
+router.get("/activity/:id", getActivityStats);
 router.get("/user/:id", getUserStats);
 
 // Keep dashboard for backward compatibility

@@ -79,15 +79,10 @@ export const getActivityStats = async (req, res) => {
   }
 };
 
-// GET /stats/user/:id - User performance stats
+// GET /stats/user/:id - User performance stats (public)
 export const getUserStats = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // Check if user is admin/manager or the owner
-    if (req.user._id.toString() !== id && req.user.role !== "admin" && req.user.role !== "manager") {
-      return res.status(403).json({ message: "Access denied" });
-    }
 
     const user = await User.findById(id);
     if (!user) {
@@ -122,10 +117,12 @@ export const getUserStats = async (req, res) => {
   }
 };
 
-// Keep dashboard stats for backward compatibility
+// Keep dashboard stats for backward compatibility (public)
+// Note: Without auth, returns default stats. For user-specific stats, use /stats/user/:id
 export const getDashboardStats = async (req, res) => {
   try {
-    const stats = req.user.stats ?? {
+    // Return default stats since we don't have user context without auth
+    const stats = {
       hoursContributed: 0,
       eventsCompleted: 0,
       impactPoints: 0,
@@ -133,6 +130,7 @@ export const getDashboardStats = async (req, res) => {
 
     return res.json({
       stats,
+      message: "For user-specific stats, use /stats/user/:id endpoint",
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to load dashboard", error: error.message });

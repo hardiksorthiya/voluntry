@@ -455,14 +455,17 @@
       <!-- Activities -->
       <div class="endpoint-group">
         <h2>Activities</h2>
+        <p style="color: #6b7280; margin-bottom: 20px; padding: 0 20px;">
+          All activity endpoints are public (no authentication required). For join/leave operations, provide userId in request body.
+        </p>
         
         <div class="endpoint">
           <div class="endpoint-header">
             <span class="method post">POST</span>
             <span class="path">/api/activities</span>
-            <span class="auth-badge">Auth Required</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
-          <div class="description">Create a new activity</div>
+          <div class="description">Create a new activity (owner is optional)</div>
           <div class="test-section">
             <div class="input-group">
               <input type="text" id="activity-title" placeholder="Title *" value="Food Drive">
@@ -471,6 +474,7 @@
               <input type="text" id="activity-location" placeholder="Location" value="Community Center">
               <input type="number" id="activity-slots" placeholder="Slots (default: 0)" value="10">
               <input type="text" id="activity-tags" placeholder="Tags (comma separated)" value="food, community">
+              <input type="text" id="activity-owner" placeholder="Owner ID (optional)">
             </div>
             <button class="test-btn" onclick="testActivityCreate()">Test Create</button>
             <div class="response" id="response-activity-create"></div>
@@ -516,7 +520,7 @@
           <div class="endpoint-header">
             <span class="method put">PUT</span>
             <span class="path">/api/activities/:id</span>
-            <span class="auth-badge">Owner/Admin</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
           <div class="description">Update activity</div>
           <div class="test-section">
@@ -535,6 +539,14 @@
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
+              <select id="activity-update-state">
+                <option value="">State (optional)</option>
+                <option value="draft">Draft</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <input type="text" id="activity-update-owner" placeholder="Owner ID (optional)">
             </div>
             <button class="test-btn" onclick="testActivityUpdate()">Test Update</button>
             <div class="response" id="response-activity-update"></div>
@@ -545,7 +557,7 @@
           <div class="endpoint-header">
             <span class="method delete">DELETE</span>
             <span class="path">/api/activities/:id</span>
-            <span class="auth-badge">Owner/Admin</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
           <div class="description">Delete activity</div>
           <div class="test-section">
@@ -561,12 +573,13 @@
           <div class="endpoint-header">
             <span class="method post">POST</span>
             <span class="path">/api/activities/:id/join</span>
-            <span class="auth-badge">Auth Required</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
-          <div class="description">Join activity</div>
+          <div class="description">Join activity (userId required in body)</div>
           <div class="test-section">
             <div class="input-group">
               <input type="text" id="activity-join-id" placeholder="Activity ID *" value="">
+              <input type="text" id="activity-join-userId" placeholder="User ID *" value="">
               <input type="number" id="activity-join-participants" placeholder="Participants count (default: 1)" value="1">
             </div>
             <button class="test-btn" onclick="testActivityJoin()">Test Join</button>
@@ -578,12 +591,13 @@
           <div class="endpoint-header">
             <span class="method post">POST</span>
             <span class="path">/api/activities/:id/leave</span>
-            <span class="auth-badge">Auth Required</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
-          <div class="description">Leave activity</div>
+          <div class="description">Leave activity (userId required in body)</div>
           <div class="test-section">
             <div class="input-group">
               <input type="text" id="activity-leave-id" placeholder="Activity ID *" value="">
+              <input type="text" id="activity-leave-userId" placeholder="User ID *" value="">
             </div>
             <button class="test-btn" onclick="testActivityLeave()">Test Leave</button>
             <div class="response" id="response-activity-leave"></div>
@@ -594,9 +608,9 @@
           <div class="endpoint-header">
             <span class="method post">POST</span>
             <span class="path">/api/activities/:id/attendance</span>
-            <span class="auth-badge">Manager/Admin</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
-          <div class="description">Record attendance</div>
+          <div class="description">Record attendance (recordedBy is optional)</div>
           <div class="test-section">
             <div class="input-group">
               <input type="text" id="activity-attendance-id" placeholder="Activity ID *" value="">
@@ -605,6 +619,7 @@
                 <option value="present">Present</option>
                 <option value="absent">Absent</option>
               </select>
+              <input type="text" id="activity-attendance-recordedBy" placeholder="Recorded By ID (optional)">
             </div>
             <button class="test-btn" onclick="testActivityAttendance()">Test</button>
             <div class="response" id="response-activity-attendance"></div>
@@ -615,7 +630,7 @@
           <div class="endpoint-header">
             <span class="method post">POST</span>
             <span class="path">/api/activities/:id/state</span>
-            <span class="auth-badge">Manager/Admin</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
           <div class="description">Change activity state</div>
           <div class="test-section">
@@ -691,16 +706,19 @@
       <!-- Statistics -->
       <div class="endpoint-group">
         <h2>Statistics</h2>
+        <p style="color: #6b7280; margin-bottom: 20px; padding: 0 20px;">
+          All statistics endpoints are public (no authentication required).
+        </p>
         
         <div class="endpoint">
           <div class="endpoint-header">
             <span class="method get">GET</span>
             <span class="path">/api/stats/overview</span>
-            <span class="auth-badge">Manager/Admin</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
           <div class="description">Get overview statistics</div>
           <div class="test-section">
-            <button class="test-btn" onclick="testEndpoint('GET', '/api/stats/overview', null, true)">Test</button>
+            <button class="test-btn" onclick="testEndpoint('GET', '/api/stats/overview', null, false)">Test</button>
             <div class="response" id="response-stats-overview"></div>
           </div>
         </div>
@@ -709,7 +727,7 @@
           <div class="endpoint-header">
             <span class="method get">GET</span>
             <span class="path">/api/stats/activity/:id</span>
-            <span class="auth-badge">Manager/Admin</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
           <div class="description">Get activity statistics</div>
           <div class="test-section">
@@ -725,7 +743,7 @@
           <div class="endpoint-header">
             <span class="method get">GET</span>
             <span class="path">/api/stats/user/:id</span>
-            <span class="auth-badge">Auth Required</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
           <div class="description">Get user statistics</div>
           <div class="test-section">
@@ -741,12 +759,38 @@
           <div class="endpoint-header">
             <span class="method get">GET</span>
             <span class="path">/api/stats/dashboard</span>
-            <span class="auth-badge">Auth Required</span>
+            <span class="auth-badge" style="background: #10b981;">Public</span>
           </div>
-          <div class="description">Get dashboard stats</div>
+          <div class="description">Get dashboard stats (returns default stats without auth)</div>
           <div class="test-section">
-            <button class="test-btn" onclick="testEndpoint('GET', '/api/stats/dashboard', null, true)">Test</button>
+            <button class="test-btn" onclick="testEndpoint('GET', '/api/stats/dashboard', null, false)">Test</button>
             <div class="response" id="response-stats-dashboard"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setup (Make Admin) -->
+      <div class="endpoint-group">
+        <h2>Setup - Make Admin</h2>
+        <p style="color: #6b7280; margin-bottom: 20px; padding: 0 20px;">
+          ⚠️ Use this route to make the FIRST user admin (for initial setup). 
+          <strong>NO AUTHENTICATION REQUIRED</strong> - but only works if no admins exist yet.
+          After first admin is created, use /api/admin/users/:id/role instead.
+        </p>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method put">PUT</span>
+            <span class="path">/api/setup/make-admin/:id</span>
+            <span class="auth-badge" style="background: #10b981;">No Auth Required</span>
+          </div>
+          <div class="description">Make first user admin (for initial setup only)</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="setup-admin-userId" placeholder="User ID * (Get from /api/users/me after registration)" value="">
+            </div>
+            <button class="test-btn" onclick="testSetupMakeAdmin()">Make Admin</button>
+            <div class="response" id="response-setup-admin"></div>
           </div>
         </div>
       </div>
@@ -964,6 +1008,9 @@ https://example.com/image2.jpg</textarea>
       }
       if (endpoint.includes('/stats/user/')) {
         return 'stats-user';
+      }
+      if (endpoint.includes('/setup/make-admin')) {
+        return 'setup-admin';
       }
       if (endpoint.includes('/admin/users') && !endpoint.includes('/role') && method !== 'DELETE') {
         return 'admin-users';
@@ -1265,6 +1312,7 @@ https://example.com/image2.jpg</textarea>
       const location = document.getElementById('activity-location').value;
       const slots = document.getElementById('activity-slots').value;
       const tags = document.getElementById('activity-tags').value;
+      const owner = document.getElementById('activity-owner').value;
       
       if (!title || !date) {
         alert('Title and Date are required');
@@ -1280,7 +1328,9 @@ https://example.com/image2.jpg</textarea>
         tags: tags ? tags.split(',').map(t => t.trim()).filter(t => t) : []
       };
       
-      testEndpoint('POST', '/api/activities', body, true);
+      if (owner) body.owner = owner;
+      
+      testEndpoint('POST', '/api/activities', body, false); // No auth required
     }
 
     function testActivitiesList() {
@@ -1324,6 +1374,8 @@ https://example.com/image2.jpg</textarea>
       const slots = document.getElementById('activity-update-slots').value;
       const tags = document.getElementById('activity-update-tags').value;
       const status = document.getElementById('activity-update-status').value;
+      const state = document.getElementById('activity-update-state').value;
+      const owner = document.getElementById('activity-update-owner').value;
       
       if (title) body.title = title;
       if (description) body.description = description;
@@ -1332,8 +1384,10 @@ https://example.com/image2.jpg</textarea>
       if (slots) body.slots = parseInt(slots);
       if (tags) body.tags = tags.split(',').map(t => t.trim()).filter(t => t);
       if (status) body.status = status;
+      if (state) body.state = state;
+      if (owner) body.owner = owner;
       
-      testEndpoint('PUT', '/api/activities/' + id, body, true);
+      testEndpoint('PUT', '/api/activities/' + id, body, false); // No auth required
     }
 
     function testActivityDelete() {
@@ -1343,47 +1397,54 @@ https://example.com/image2.jpg</textarea>
         return;
       }
       if (!confirm('⚠️ WARNING: This will permanently delete the activity. Are you sure?')) return;
-      testEndpoint('DELETE', '/api/activities/' + id, null, true);
+      testEndpoint('DELETE', '/api/activities/' + id, null, false); // No auth required
     }
 
     function testActivityJoin() {
       const id = document.getElementById('activity-join-id').value;
+      const userId = document.getElementById('activity-join-userId').value;
       const participants = document.getElementById('activity-join-participants').value;
-      if (!id) {
-        alert('Please provide Activity ID');
+      if (!id || !userId) {
+        alert('Please provide Activity ID and User ID');
         return;
       }
-      testEndpoint('POST', '/api/activities/' + id + '/join', {participants: parseInt(participants) || 1}, true);
+      const body = { userId };
+      if (participants) body.participants = parseInt(participants);
+      testEndpoint('POST', '/api/activities/' + id + '/join', body, false); // No auth required
     }
 
     function testActivityLeave() {
       const id = document.getElementById('activity-leave-id').value;
-      if (!id) {
-        alert('Please provide Activity ID');
+      const userId = document.getElementById('activity-leave-userId').value;
+      if (!id || !userId) {
+        alert('Please provide Activity ID and User ID');
         return;
       }
-      testEndpoint('POST', '/api/activities/' + id + '/leave', null, true);
+      testEndpoint('POST', '/api/activities/' + id + '/leave', {userId}, false); // No auth required
     }
 
     function testActivityAttendance() {
       const id = document.getElementById('activity-attendance-id').value;
       const userId = document.getElementById('activity-attendance-userId').value;
       const status = document.getElementById('activity-attendance-status').value;
-      if (!id || !userId) {
-        alert('Please provide Activity ID and User ID');
+      const recordedBy = document.getElementById('activity-attendance-recordedBy').value;
+      if (!id || !userId || !status) {
+        alert('Please provide Activity ID, User ID, and Status');
         return;
       }
-      testEndpoint('POST', '/api/activities/' + id + '/attendance', {userId, status}, true);
+      const body = { userId, status };
+      if (recordedBy) body.recordedBy = recordedBy;
+      testEndpoint('POST', '/api/activities/' + id + '/attendance', body, false); // No auth required
     }
 
     function testActivityState() {
       const id = document.getElementById('activity-state-id').value;
       const state = document.getElementById('activity-state').value;
-      if (!id) {
-        alert('Please provide Activity ID');
+      if (!id || !state) {
+        alert('Please provide Activity ID and State');
         return;
       }
-      testEndpoint('POST', '/api/activities/' + id + '/state', {state}, true);
+      testEndpoint('POST', '/api/activities/' + id + '/state', {state}, false); // No auth required
     }
 
     // Chat functions
@@ -1418,7 +1479,7 @@ https://example.com/image2.jpg</textarea>
         alert('Please provide Activity ID');
         return;
       }
-      testEndpoint('GET', '/api/stats/activity/' + id, null, true);
+      testEndpoint('GET', '/api/stats/activity/' + id, null, false); // No auth required
     }
 
     function testStatsUser() {
@@ -1427,7 +1488,18 @@ https://example.com/image2.jpg</textarea>
         alert('Please provide User ID');
         return;
       }
-      testEndpoint('GET', '/api/stats/user/' + id, null, true);
+      testEndpoint('GET', '/api/stats/user/' + id, null, false); // No auth required
+    }
+
+    // Setup functions
+    function testSetupMakeAdmin() {
+      const userId = document.getElementById('setup-admin-userId').value;
+      if (!userId) {
+        alert('Please provide User ID. Get it from /api/users/me after registration.');
+        return;
+      }
+      if (!confirm('⚠️ This will make this user an admin (only works if no admins exist). Continue?')) return;
+      testEndpoint('PUT', '/api/setup/make-admin/' + userId, null, false); // No auth required
     }
 
     // Admin functions

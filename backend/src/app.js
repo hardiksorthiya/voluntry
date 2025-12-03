@@ -11,6 +11,7 @@ import volunteerRoutes from "./routes/volunteerRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import setupRoutes from "./routes/setupRoutes.js";
 
 dotenv.config();
 await connectDB();
@@ -534,6 +535,7 @@ app.use("/api/volunteer", volunteerRoutes); // Keep for backward compatibility
 app.use("/api/stats", statsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/setup", setupRoutes); // Setup routes (for initial admin creation)
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

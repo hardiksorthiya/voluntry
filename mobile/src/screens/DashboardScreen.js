@@ -90,6 +90,14 @@ export default function DashboardScreen({ navigation, user, onLogout }) {
     loadDashboardData();
   }, [user]);
 
+  // Refresh when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadDashboardData();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const onRefresh = () => {
     setRefreshing(true);
     loadDashboardData();
@@ -200,13 +208,15 @@ export default function DashboardScreen({ navigation, user, onLogout }) {
               <Text style={styles.actionText}>Activities</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('CreateActivity')}
-            >
-              <Text style={styles.actionIcon}>➕</Text>
-              <Text style={styles.actionText}>Create</Text>
-            </TouchableOpacity>
+            {user?.role === 'admin' && (
+              <TouchableOpacity
+                style={styles.actionCard}
+                onPress={() => navigation.navigate('CreateActivity')}
+              >
+                <Text style={styles.actionIcon}>➕</Text>
+                <Text style={styles.actionText}>Create</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={styles.actionCard}
