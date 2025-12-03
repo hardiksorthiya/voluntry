@@ -3,10 +3,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
 import volunteerRoutes from "./routes/volunteerRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 dotenv.config();
 await connectDB();
@@ -20,6 +24,25 @@ app.get("/health", (_req, res) =>
 );
 
 // API Documentation Route - Interactive HTML Page
+app.get("/docs", async (_req, res) => {
+  const baseUrl = `http://localhost:${process.env.PORT || 4000}`;
+  try {
+    const { readFile } = await import('fs/promises');
+    const { fileURLToPath } = await import('url');
+    const { dirname, join } = await import('path');
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const templatePath = join(__dirname, 'docs-template.html');
+    let html = await readFile(templatePath, 'utf-8');
+    html = html.replace('BASE_URL_PLACEHOLDER', baseUrl);
+    res.send(html);
+  } catch (error) {
+    res.status(500).send(`Error loading docs: ${error.message}`);
+  }
+});
+
+// Old docs route (commented out for reference)
+/*
 app.get("/docs", (_req, res) => {
   const baseUrl = `http://localhost:${process.env.PORT || 4000}`;
   res.send(`
@@ -499,12 +522,18 @@ app.get("/docs", (_req, res) => {
 </html>
   `);
 });
+*/
 
+// API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/profile", profileRoutes); // Keep for backward compatibility
 app.use("/api/chat", chatRoutes);
-app.use("/api/volunteer", volunteerRoutes);
+app.use("/api/activities", activityRoutes);
+app.use("/api/volunteer", volunteerRoutes); // Keep for backward compatibility
 app.use("/api/stats", statsRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

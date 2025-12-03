@@ -1,15 +1,23 @@
 import { Router } from "express";
 import {
+  getOverview,
+  getActivityStats,
+  getUserStats,
   getDashboardStats,
-  getLeaderboard,
 } from "../controllers/statsController.js";
-import { requireAuth } from "../middleware/authMiddleware.js";
+import { requireAuth, requireManager } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 router.use(requireAuth);
+
+// New endpoints
+router.get("/overview", requireManager, getOverview);
+router.get("/activity/:id", requireManager, getActivityStats);
+router.get("/user/:id", getUserStats);
+
+// Keep dashboard for backward compatibility
 router.get("/dashboard", getDashboardStats);
-router.get("/leaderboard", getLeaderboard);
 
 export default router;
 

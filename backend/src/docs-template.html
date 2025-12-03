@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voluntry API Documentation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+    .header p { opacity: 0.9; }
+    .content { padding: 30px; }
+    .token-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #667eea;
+    }
+    .token-section input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .endpoint-group {
+      margin-bottom: 40px;
+    }
+    .endpoint-group h2 {
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+    .endpoint {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #e0e0e0;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .method {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .method.get { background: #61affe; color: white; }
+    .method.post { background: #49cc90; color: white; }
+    .method.put { background: #fca130; color: white; }
+    .method.delete { background: #f93e3e; color: white; }
+    .path {
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      color: #333;
+      font-weight: 600;
+    }
+    .description {
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .auth-badge {
+      display: inline-block;
+      background: #ffc107;
+      color: #333;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .input-group {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .input-group input, .input-group textarea, .input-group select {
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .input-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .input-group label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: -5px;
+    }
+    .test-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .test-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .test-btn:hover { background: #5568d3; }
+    .test-btn.danger { background: #f93e3e; }
+    .test-btn.danger:hover { background: #d32f2f; }
+    .response {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+      display: none;
+      position: relative;
+    }
+    .response.show { 
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .response pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .response.success { border-left-color: #49cc90; }
+    .response.error { border-left-color: #f93e3e; }
+    .endpoint {
+      scroll-margin-top: 20px;
+    }
+    .query-params {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Voluntry API Documentation</h1>
+      <p>Test all endpoints directly from this page</p>
+    </div>
+    <div class="content">
+      <div class="token-section">
+        <h3>🔑 Authentication Token</h3>
+        <p>After logging in, paste your JWT token here to test authenticated endpoints:</p>
+        <input type="text" id="authToken" placeholder="Bearer token will be auto-filled after login">
+      </div>
+
+      <!-- Health Check -->
+      <div class="endpoint-group">
+        <h2>Health Check</h2>
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/health</span>
+          </div>
+          <div class="description">Health check endpoint - no authentication required</div>
+          <div class="test-section">
+            <button class="test-btn" onclick="testEndpoint('GET', '/health', null)">Test</button>
+            <div class="response" id="response-health"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authentication -->
+      <div class="endpoint-group">
+        <h2>Authentication</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/register</span>
+          </div>
+          <div class="description">Register a new user</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="register-name" placeholder="Name *" value="John Doe">
+              <input type="email" id="register-email" placeholder="Email *" value="john@example.com">
+              <input type="password" id="register-password" placeholder="Password *" value="password123">
+            </div>
+            <button class="test-btn" onclick="testRegister()">Test Register</button>
+            <div class="response" id="response-register"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/signup</span>
+          </div>
+          <div class="description">Signup (alias for register)</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="signup-name" placeholder="Name *" value="John Doe">
+              <input type="email" id="signup-email" placeholder="Email *" value="john@example.com">
+              <input type="password" id="signup-password" placeholder="Password *" value="password123">
+            </div>
+            <button class="test-btn" onclick="testSignup()">Test Signup</button>
+            <div class="response" id="response-signup"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/login</span>
+          </div>
+          <div class="description">Login and get JWT token</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="email" id="login-email" placeholder="Email *" value="john@example.com">
+              <input type="password" id="login-password" placeholder="Password *" value="password123">
+            </div>
+            <button class="test-btn" onclick="testLogin()">Test Login</button>
+            <div class="response" id="response-login"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/refresh</span>
+          </div>
+          <div class="description">Refresh access token</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="refresh-token" placeholder="Refresh Token *">
+            </div>
+            <button class="test-btn" onclick="testRefresh()">Test Refresh</button>
+            <div class="response" id="response-refresh"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/auth/logout</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Logout user</div>
+          <div class="test-section">
+            <button class="test-btn" onclick="testEndpoint('POST', '/api/auth/logout', null, true)">Test Logout</button>
+            <div class="response" id="response-logout"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="endpoint-group">
+        <h2>Users</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/users/me</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get current user profile</div>
+          <div class="test-section">
+            <button class="test-btn" onclick="testEndpoint('GET', '/api/users/me', null, true)">Test</button>
+            <div class="response" id="response-users-me"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method put">PUT</span>
+            <span class="path">/api/users/me</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Update current user profile</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="users-me-name" placeholder="Name (optional)">
+              <input type="text" id="users-me-phone" placeholder="Phone (optional)">
+              <input type="text" id="users-me-bio" placeholder="Bio (optional)">
+              <input type="text" id="users-me-location" placeholder="Location (optional)">
+              <input type="text" id="users-me-skills" placeholder="Skills (comma separated, optional)">
+              <input type="text" id="users-me-availability" placeholder="Availability (optional)">
+              <input type="text" id="users-me-avatarUrl" placeholder="Avatar URL (optional)">
+            </div>
+            <button class="test-btn" onclick="testUsersMeUpdate()">Test Update</button>
+            <div class="response" id="response-users-me-update"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span class="path">/api/users/me</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Delete current user</div>
+          <div class="test-section">
+            <button class="test-btn danger" onclick="testUsersMeDelete()">Delete Account</button>
+            <div class="response" id="response-users-me-delete"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/users/:id</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get public view of user profile</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="users-id" placeholder="User ID *" value="">
+            </div>
+            <button class="test-btn" onclick="testUsersById()">Test</button>
+            <div class="response" id="response-users-id"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/users/:id/activities</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get activities for a user</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="users-activities-id" placeholder="User ID *" value="">
+              <select id="users-activities-role">
+                <option value="">All roles</option>
+                <option value="participant">Participant</option>
+                <option value="owner">Owner</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testUsersActivities()">Test</button>
+            <div class="response" id="response-users-activities"></div>
+          </div>
+        </div>
+
+         <div class="endpoint">
+           <div class="endpoint-header">
+             <span class="method get">GET</span>
+             <span class="path">/api/users</span>
+             <span class="auth-badge">Auth Required</span>
+           </div>
+           <div class="description">List users (authenticated users only)</div>
+          <div class="test-section">
+            <div class="query-params">
+              <input type="number" id="users-page" placeholder="Page (default: 1)" value="1">
+              <input type="number" id="users-limit" placeholder="Limit (default: 20)" value="20">
+            </div>
+            <button class="test-btn" onclick="testUsersList()">Test</button>
+            <div class="response" id="response-users-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile (Backward Compatibility) -->
+      <div class="endpoint-group">
+        <h2>Profile (Legacy)</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/profile</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get current user profile</div>
+          <div class="test-section">
+            <button class="test-btn" onclick="testEndpoint('GET', '/api/profile', null, true)">Test</button>
+            <div class="response" id="response-profile-get"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method put">PUT</span>
+            <span class="path">/api/profile</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Update user profile</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="profile-name" placeholder="Name (optional)">
+              <input type="email" id="profile-email" placeholder="Email (optional)">
+              <input type="text" id="profile-bio" placeholder="Bio (optional)">
+              <input type="text" id="profile-phone" placeholder="Phone (optional)">
+              <input type="text" id="profile-location" placeholder="Location (optional)">
+            </div>
+            <button class="test-btn" onclick="testProfileUpdate()">Test Update</button>
+            <div class="response" id="response-profile-update"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span class="path">/api/profile</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Delete user account</div>
+          <div class="test-section">
+            <button class="test-btn danger" onclick="testProfileDelete()">Delete Profile</button>
+            <div class="response" id="response-profile-delete"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activities -->
+      <div class="endpoint-group">
+        <h2>Activities</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/activities</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Create a new activity</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-title" placeholder="Title *" value="Food Drive">
+              <textarea id="activity-description" placeholder="Description">Help pack food boxes for the community</textarea>
+              <input type="datetime-local" id="activity-date" placeholder="Date *">
+              <input type="text" id="activity-location" placeholder="Location" value="Community Center">
+              <input type="number" id="activity-slots" placeholder="Slots (default: 0)" value="10">
+              <input type="text" id="activity-tags" placeholder="Tags (comma separated)" value="food, community">
+            </div>
+            <button class="test-btn" onclick="testActivityCreate()">Test Create</button>
+            <div class="response" id="response-activity-create"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/activities</span>
+          </div>
+          <div class="description">List activities (public, with filters)</div>
+          <div class="test-section">
+            <div class="query-params">
+              <input type="number" id="activities-page" placeholder="Page" value="1">
+              <input type="number" id="activities-limit" placeholder="Limit" value="20">
+              <input type="text" id="activities-tag" placeholder="Tag filter">
+              <input type="text" id="activities-search" placeholder="Search">
+              <input type="date" id="activities-from" placeholder="From date">
+              <input type="date" id="activities-to" placeholder="To date">
+            </div>
+            <button class="test-btn" onclick="testActivitiesList()">Test</button>
+            <div class="response" id="response-activities-list"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/activities/:id</span>
+          </div>
+          <div class="description">Get activity details</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-id" placeholder="Activity ID *" value="">
+            </div>
+            <button class="test-btn" onclick="testActivityById()">Test</button>
+            <div class="response" id="response-activity-id"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method put">PUT</span>
+            <span class="path">/api/activities/:id</span>
+            <span class="auth-badge">Owner/Admin</span>
+          </div>
+          <div class="description">Update activity</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-update-id" placeholder="Activity ID *" value="">
+              <input type="text" id="activity-update-title" placeholder="Title (optional)">
+              <textarea id="activity-update-description" placeholder="Description (optional)"></textarea>
+              <input type="datetime-local" id="activity-update-date" placeholder="Date (optional)">
+              <input type="text" id="activity-update-location" placeholder="Location (optional)">
+              <input type="number" id="activity-update-slots" placeholder="Slots (optional)">
+              <input type="text" id="activity-update-tags" placeholder="Tags (comma separated, optional)">
+              <select id="activity-update-status">
+                <option value="">Status (optional)</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testActivityUpdate()">Test Update</button>
+            <div class="response" id="response-activity-update"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span class="path">/api/activities/:id</span>
+            <span class="auth-badge">Owner/Admin</span>
+          </div>
+          <div class="description">Delete activity</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-delete-id" placeholder="Activity ID *" value="">
+            </div>
+            <button class="test-btn danger" onclick="testActivityDelete()">Delete</button>
+            <div class="response" id="response-activity-delete"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/activities/:id/join</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Join activity</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-join-id" placeholder="Activity ID *" value="">
+              <input type="number" id="activity-join-participants" placeholder="Participants count (default: 1)" value="1">
+            </div>
+            <button class="test-btn" onclick="testActivityJoin()">Test Join</button>
+            <div class="response" id="response-activity-join"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/activities/:id/leave</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Leave activity</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-leave-id" placeholder="Activity ID *" value="">
+            </div>
+            <button class="test-btn" onclick="testActivityLeave()">Test Leave</button>
+            <div class="response" id="response-activity-leave"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/activities/:id/attendance</span>
+            <span class="auth-badge">Manager/Admin</span>
+          </div>
+          <div class="description">Record attendance</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-attendance-id" placeholder="Activity ID *" value="">
+              <input type="text" id="activity-attendance-userId" placeholder="User ID *" value="">
+              <select id="activity-attendance-status">
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testActivityAttendance()">Test</button>
+            <div class="response" id="response-activity-attendance"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/activities/:id/state</span>
+            <span class="auth-badge">Manager/Admin</span>
+          </div>
+          <div class="description">Change activity state</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="activity-state-id" placeholder="Activity ID *" value="">
+              <select id="activity-state">
+                <option value="draft">Draft</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testActivityState()">Test</button>
+            <div class="response" id="response-activity-state"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div class="endpoint-group">
+        <h2>Chat</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/chat</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Send message to AI chat</div>
+          <div class="test-section">
+            <div class="input-group">
+              <textarea id="chat-message" placeholder="Message *">How can I help with volunteering?</textarea>
+            </div>
+            <button class="test-btn" onclick="testChatSend()">Test Send</button>
+            <div class="response" id="response-chat"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/chat/history</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get chat history</div>
+          <div class="test-section">
+            <div class="query-params">
+              <input type="number" id="chat-history-page" placeholder="Page" value="1">
+              <input type="number" id="chat-history-limit" placeholder="Limit" value="20">
+            </div>
+            <button class="test-btn" onclick="testChatHistory()">Test</button>
+            <div class="response" id="response-chat-history"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/chat/:id</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get single chat thread</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="chat-id" placeholder="Chat ID *" value="">
+            </div>
+            <button class="test-btn" onclick="testChatById()">Test</button>
+            <div class="response" id="response-chat-id"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="endpoint-group">
+        <h2>Statistics</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/stats/overview</span>
+            <span class="auth-badge">Manager/Admin</span>
+          </div>
+          <div class="description">Get overview statistics</div>
+          <div class="test-section">
+            <button class="test-btn" onclick="testEndpoint('GET', '/api/stats/overview', null, true)">Test</button>
+            <div class="response" id="response-stats-overview"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/stats/activity/:id</span>
+            <span class="auth-badge">Manager/Admin</span>
+          </div>
+          <div class="description">Get activity statistics</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="stats-activity-id" placeholder="Activity ID *" value="">
+            </div>
+            <button class="test-btn" onclick="testStatsActivity()">Test</button>
+            <div class="response" id="response-stats-activity"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/stats/user/:id</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get user statistics</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="stats-user-id" placeholder="User ID *" value="">
+            </div>
+            <button class="test-btn" onclick="testStatsUser()">Test</button>
+            <div class="response" id="response-stats-user"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/stats/dashboard</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get dashboard stats</div>
+          <div class="test-section">
+            <button class="test-btn" onclick="testEndpoint('GET', '/api/stats/dashboard', null, true)">Test</button>
+            <div class="response" id="response-stats-dashboard"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin -->
+      <div class="endpoint-group">
+        <h2>Admin</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/admin/users</span>
+            <span class="auth-badge">Admin Only</span>
+          </div>
+          <div class="description">List users (admin)</div>
+          <div class="test-section">
+            <div class="query-params">
+              <input type="number" id="admin-users-page" placeholder="Page" value="1">
+              <input type="number" id="admin-users-limit" placeholder="Limit" value="20">
+              <input type="text" id="admin-users-search" placeholder="Search">
+              <select id="admin-users-role">
+                <option value="">All roles</option>
+                <option value="user">User</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testAdminUsers()">Test</button>
+            <div class="response" id="response-admin-users"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method put">PUT</span>
+            <span class="path">/api/admin/users/:id/role</span>
+            <span class="auth-badge">Admin Only</span>
+          </div>
+          <div class="description">Change user role</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="admin-role-userId" placeholder="User ID *" value="">
+              <select id="admin-role-role">
+                <option value="user">User</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testAdminRole()">Test</button>
+            <div class="response" id="response-admin-role"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span class="path">/api/admin/users/:id</span>
+            <span class="auth-badge">Admin Only</span>
+          </div>
+          <div class="description">Remove user</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="admin-delete-userId" placeholder="User ID *" value="">
+            </div>
+            <button class="test-btn danger" onclick="testAdminDelete()">Delete User</button>
+            <div class="response" id="response-admin-delete"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/admin/activities</span>
+            <span class="auth-badge">Admin Only</span>
+          </div>
+          <div class="description">List activities (admin)</div>
+          <div class="test-section">
+            <div class="query-params">
+              <input type="number" id="admin-activities-page" placeholder="Page" value="1">
+              <input type="number" id="admin-activities-limit" placeholder="Limit" value="20">
+              <input type="text" id="admin-activities-search" placeholder="Search">
+              <select id="admin-activities-state">
+                <option value="">All states</option>
+                <option value="draft">Draft</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select id="admin-activities-status">
+                <option value="">All statuses</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button class="test-btn" onclick="testAdminActivities()">Test</button>
+            <div class="response" id="response-admin-activities"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <div class="endpoint-group">
+        <h2>File Uploads</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/upload/avatar</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Upload avatar (currently accepts URL)</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="upload-avatar-url" placeholder="Avatar URL *" value="https://example.com/avatar.jpg">
+            </div>
+            <button class="test-btn" onclick="testUploadAvatar()">Test Upload</button>
+            <div class="response" id="response-upload-avatar"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/upload/activities/:id/media</span>
+            <span class="auth-badge">Owner/Admin</span>
+          </div>
+          <div class="description">Upload activity media (currently accepts URLs)</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="upload-media-activityId" placeholder="Activity ID *" value="">
+              <textarea id="upload-media-urls" placeholder="Media URLs (one per line or comma separated) *">https://example.com/image1.jpg
+https://example.com/image2.jpg</textarea>
+            </div>
+            <button class="test-btn" onclick="testUploadMedia()">Test Upload</button>
+            <div class="response" id="response-upload-media"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const baseUrl = 'BASE_URL_PLACEHOLDER';
+    
+    function getResponseId(endpoint, method = '') {
+      // Map specific endpoints to their response IDs
+      const endpointMap = {
+        '/health': 'health',
+        '/api/auth/register': 'register',
+        '/api/auth/signup': 'signup',
+        '/api/auth/login': 'login',
+        '/api/auth/refresh': 'refresh',
+        '/api/auth/logout': 'logout',
+        '/api/users/me': 'users-me',
+        '/api/profile': 'profile-get',
+        '/api/chat': 'chat',
+        '/api/chat/history': 'chat-history',
+        '/api/stats/overview': 'stats-overview',
+        '/api/stats/dashboard': 'stats-dashboard'
+      };
+      
+      // Check if we have a direct mapping (without query params)
+      const endpointWithoutQuery = endpoint.split('?')[0];
+      if (endpointMap[endpointWithoutQuery]) {
+        return endpointMap[endpointWithoutQuery];
+      }
+      
+      // For dynamic endpoints, extract the key part
+      if (endpoint.includes('/users/') && endpoint.includes('/activities')) {
+        return 'users-activities';
+      }
+      if (endpoint.includes('/users/') && !endpoint.includes('/me') && !endpoint.includes('/activities') && !endpoint.includes('/role')) {
+        return 'users-id';
+      }
+      if (endpoint.includes('/activities/') && endpoint.includes('/join')) {
+        return 'activity-join';
+      }
+      if (endpoint.includes('/activities/') && endpoint.includes('/leave')) {
+        return 'activity-leave';
+      }
+      if (endpoint.includes('/activities/') && endpoint.includes('/attendance')) {
+        return 'activity-attendance';
+      }
+      if (endpoint.includes('/activities/') && endpoint.includes('/state')) {
+        return 'activity-state';
+      }
+      if (endpoint.includes('/upload/activities/') && endpoint.includes('/media')) {
+        return 'upload-media';
+      }
+      if (endpoint.includes('/activities')) {
+        if (endpoint.endsWith('/activities') || endpoint.match(/\/activities\?/)) {
+          return 'activities-list';
+        }
+        if (endpoint.match(/\/activities\/[^/]+$/) && method !== 'PUT' && method !== 'DELETE') {
+          return 'activity-id';
+        }
+        if (method === 'PUT' || endpoint.includes('update')) {
+          return 'activity-update';
+        }
+        if (method === 'DELETE') {
+          return 'activity-delete';
+        }
+        if (method === 'POST') {
+          return 'activity-create';
+        }
+        return 'activities-list';
+      }
+      if (endpoint.includes('/chat/') && !endpoint.includes('/history')) {
+        return 'chat-id';
+      }
+      if (endpoint.includes('/stats/activity/')) {
+        return 'stats-activity';
+      }
+      if (endpoint.includes('/stats/user/')) {
+        return 'stats-user';
+      }
+      if (endpoint.includes('/admin/users') && !endpoint.includes('/role') && method !== 'DELETE') {
+        return 'admin-users';
+      }
+      if (endpoint.includes('/admin/users/') && endpoint.includes('/role')) {
+        return 'admin-role';
+      }
+      if (endpoint.includes('/admin/users/') && method === 'DELETE') {
+        return 'admin-delete';
+      }
+      if (endpoint.includes('/admin/activities')) {
+        return 'admin-activities';
+      }
+      if (endpoint.includes('/upload/avatar')) {
+        return 'upload-avatar';
+      }
+      
+      // Fallback: generate from endpoint
+      return endpoint.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    }
+
+    async function testEndpoint(method, endpoint, body, needsAuth = false, queryParams = {}) {
+      let fullEndpoint = endpoint;
+      
+      // Add query parameters
+      if (Object.keys(queryParams).length > 0) {
+        const params = new URLSearchParams();
+        Object.keys(queryParams).forEach(key => {
+          if (queryParams[key]) params.append(key, queryParams[key]);
+        });
+        if (params.toString()) fullEndpoint += '?' + params.toString();
+      }
+
+      // Get response ID based on endpoint and method
+      const responseId = 'response-' + getResponseId(endpoint, method);
+      let responseDiv = document.getElementById(responseId);
+      
+      // If response div doesn't exist, find the button that was clicked and add response div after it
+      if (!responseDiv) {
+        // Find the button that triggered this call by looking for buttons with this endpoint
+        const buttons = Array.from(document.querySelectorAll('.test-btn'));
+        let targetButton = buttons.find(btn => {
+          const onclick = btn.getAttribute('onclick');
+          return onclick && onclick.includes(endpoint.split('/').pop());
+        });
+        
+        if (!targetButton) {
+          // Try to find by method and endpoint pattern
+          targetButton = buttons.find(btn => {
+            const onclick = btn.getAttribute('onclick');
+            return onclick && onclick.includes(method) && onclick.includes(endpoint);
+          });
+        }
+        
+        if (targetButton) {
+          const testSection = targetButton.closest('.test-section');
+          if (testSection) {
+            responseDiv = document.createElement('div');
+            responseDiv.className = 'response';
+            responseDiv.id = responseId;
+            testSection.appendChild(responseDiv);
+          }
+        }
+      }
+      
+      // If still no response div, create it at the end (shouldn't happen)
+      if (!responseDiv) {
+        responseDiv = document.createElement('div');
+        responseDiv.className = 'response';
+        responseDiv.id = responseId;
+        document.body.appendChild(responseDiv);
+      }
+      
+      responseDiv.className = 'response';
+      responseDiv.innerHTML = '<pre>Loading...</pre>';
+      responseDiv.classList.add('show');
+      
+      // Scroll to response - use nearest to keep it close to the button
+      setTimeout(() => {
+        responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Add a highlight effect to draw attention
+        responseDiv.style.transition = 'box-shadow 0.3s';
+        responseDiv.style.boxShadow = '0 0 15px rgba(102, 126, 234, 0.6)';
+        setTimeout(() => {
+          responseDiv.style.boxShadow = '';
+        }, 2000);
+      }, 200);
+
+      const options = {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+
+      if (needsAuth) {
+        const token = document.getElementById('authToken').value;
+        if (!token) {
+          responseDiv.className = 'response error show';
+          responseDiv.innerHTML = '<pre>Error: Please add authentication token first (login to get token)</pre>';
+          return;
+        }
+        options.headers['Authorization'] = 'Bearer ' + token;
+      }
+
+      if (body && (method === 'POST' || method === 'PUT')) {
+        options.body = JSON.stringify(body);
+      }
+
+      try {
+        const response = await fetch(baseUrl + fullEndpoint, options);
+        const data = await response.json();
+        
+        responseDiv.className = 'response ' + (response.ok ? 'success' : 'error') + ' show';
+        responseDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        
+        // Scroll to response to make it visible - keep it near the button
+        setTimeout(() => {
+          responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          // Highlight the response
+          responseDiv.style.transition = 'box-shadow 0.3s';
+          responseDiv.style.boxShadow = response.ok 
+            ? '0 0 15px rgba(73, 204, 144, 0.6)' 
+            : '0 0 15px rgba(249, 62, 62, 0.6)';
+          setTimeout(() => {
+            responseDiv.style.boxShadow = '';
+          }, 2000);
+        }, 100);
+        
+        // Auto-fill token if login successful
+        if ((endpoint === '/api/auth/login' || endpoint === '/api/auth/signup' || endpoint === '/api/auth/register') && data.token) {
+          document.getElementById('authToken').value = data.token;
+          if (data.refreshToken) {
+            document.getElementById('refresh-token').value = data.refreshToken;
+          }
+        }
+      } catch (error) {
+        responseDiv.className = 'response error show';
+        responseDiv.innerHTML = '<pre>Error: ' + error.message + '</pre>';
+        // Scroll to error response - keep it near the button
+        setTimeout(() => {
+          responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          // Highlight error
+          responseDiv.style.transition = 'box-shadow 0.3s';
+          responseDiv.style.boxShadow = '0 0 15px rgba(249, 62, 62, 0.6)';
+          setTimeout(() => {
+            responseDiv.style.boxShadow = '';
+          }, 2000);
+        }, 100);
+      }
+    }
+
+    // Auth functions
+    function testRegister() {
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      if (!name || !email || !password) {
+        const responseDiv = document.getElementById('response-register');
+        if (responseDiv) {
+          responseDiv.className = 'response error show';
+          responseDiv.innerHTML = '<pre>Error: Please fill in all fields</pre>';
+        } else {
+          alert('Please fill in all fields');
+        }
+        return;
+      }
+      testEndpoint('POST', '/api/auth/register', {name, email, password});
+    }
+
+    function testSignup() {
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      if (!name || !email || !password) {
+        const responseDiv = document.getElementById('response-signup');
+        if (responseDiv) {
+          responseDiv.className = 'response error show';
+          responseDiv.innerHTML = '<pre>Error: Please fill in all fields</pre>';
+        } else {
+          alert('Please fill in all fields');
+        }
+        return;
+      }
+      testEndpoint('POST', '/api/auth/signup', {name, email, password});
+    }
+
+    function testLogin() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) {
+        const responseDiv = document.getElementById('response-login');
+        if (responseDiv) {
+          responseDiv.className = 'response error show';
+          responseDiv.innerHTML = '<pre>Error: Please fill in all fields</pre>';
+        } else {
+          alert('Please fill in all fields');
+        }
+        return;
+      }
+      testEndpoint('POST', '/api/auth/login', {email, password});
+    }
+
+    function testRefresh() {
+      const refreshToken = document.getElementById('refresh-token').value;
+      if (!refreshToken) {
+        const responseDiv = document.getElementById('response-refresh');
+        if (responseDiv) {
+          responseDiv.className = 'response error show';
+          responseDiv.innerHTML = '<pre>Error: Please provide refresh token</pre>';
+        } else {
+          alert('Please provide refresh token');
+        }
+        return;
+      }
+      testEndpoint('POST', '/api/auth/refresh', {refreshToken});
+    }
+
+    // Users functions
+    function testUsersMeUpdate() {
+      const body = {};
+      const name = document.getElementById('users-me-name').value;
+      const phone = document.getElementById('users-me-phone').value;
+      const bio = document.getElementById('users-me-bio').value;
+      const location = document.getElementById('users-me-location').value;
+      const skills = document.getElementById('users-me-skills').value;
+      const availability = document.getElementById('users-me-availability').value;
+      const avatarUrl = document.getElementById('users-me-avatarUrl').value;
+      
+      if (name) body.name = name;
+      if (phone) body.phone = phone;
+      if (bio) body.bio = bio;
+      if (location) body.location = location;
+      if (skills) body.skills = skills.split(',').map(s => s.trim()).filter(s => s);
+      if (availability) body.availability = availability;
+      if (avatarUrl) body.avatarUrl = avatarUrl;
+      
+      testEndpoint('PUT', '/api/users/me', body, true);
+    }
+
+    function testUsersMeDelete() {
+      if (!confirm('⚠️ WARNING: This will permanently delete your account. Are you sure?')) return;
+      testEndpoint('DELETE', '/api/users/me', null, true);
+    }
+
+    function testUsersById() {
+      const id = document.getElementById('users-id').value;
+      if (!id) {
+        alert('Please provide User ID');
+        return;
+      }
+      testEndpoint('GET', '/api/users/' + id, null, true);
+    }
+
+    function testUsersActivities() {
+      const id = document.getElementById('users-activities-id').value;
+      const role = document.getElementById('users-activities-role').value;
+      if (!id) {
+        alert('Please provide User ID');
+        return;
+      }
+      testEndpoint('GET', '/api/users/' + id + '/activities', null, true, role ? {role} : {});
+    }
+
+    function testUsersList() {
+      const page = document.getElementById('users-page').value || 1;
+      const limit = document.getElementById('users-limit').value || 20;
+      testEndpoint('GET', '/api/users', null, true, {page, limit});
+    }
+
+    // Profile functions
+    function testProfileUpdate() {
+      const body = {};
+      const name = document.getElementById('profile-name').value;
+      const email = document.getElementById('profile-email').value;
+      const bio = document.getElementById('profile-bio').value;
+      const phone = document.getElementById('profile-phone').value;
+      const location = document.getElementById('profile-location').value;
+      
+      if (name) body.name = name;
+      if (email) body.email = email;
+      if (bio) body.bio = bio;
+      if (phone) body.phone = phone;
+      if (location) body.location = location;
+      
+      testEndpoint('PUT', '/api/profile', body, true);
+    }
+
+    function testProfileDelete() {
+      if (!confirm('⚠️ WARNING: This will permanently delete your account. Are you sure?')) return;
+      testEndpoint('DELETE', '/api/profile', null, true);
+    }
+
+    // Activity functions
+    function testActivityCreate() {
+      const title = document.getElementById('activity-title').value;
+      const description = document.getElementById('activity-description').value;
+      const date = document.getElementById('activity-date').value;
+      const location = document.getElementById('activity-location').value;
+      const slots = document.getElementById('activity-slots').value;
+      const tags = document.getElementById('activity-tags').value;
+      
+      if (!title || !date) {
+        alert('Title and Date are required');
+        return;
+      }
+      
+      const body = {
+        title,
+        description,
+        date: new Date(date).toISOString(),
+        location,
+        slots: parseInt(slots) || 0,
+        tags: tags ? tags.split(',').map(t => t.trim()).filter(t => t) : []
+      };
+      
+      testEndpoint('POST', '/api/activities', body, true);
+    }
+
+    function testActivitiesList() {
+      const page = document.getElementById('activities-page').value || 1;
+      const limit = document.getElementById('activities-limit').value || 20;
+      const tag = document.getElementById('activities-tag').value;
+      const search = document.getElementById('activities-search').value;
+      const from = document.getElementById('activities-from').value;
+      const to = document.getElementById('activities-to').value;
+      
+      const params = {page, limit};
+      if (tag) params.tag = tag;
+      if (search) params.search = search;
+      if (from) params.from = from;
+      if (to) params.to = to;
+      
+      testEndpoint('GET', '/api/activities', null, false, params);
+    }
+
+    function testActivityById() {
+      const id = document.getElementById('activity-id').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      testEndpoint('GET', '/api/activities/' + id, null, false);
+    }
+
+    function testActivityUpdate() {
+      const id = document.getElementById('activity-update-id').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      
+      const body = {};
+      const title = document.getElementById('activity-update-title').value;
+      const description = document.getElementById('activity-update-description').value;
+      const date = document.getElementById('activity-update-date').value;
+      const location = document.getElementById('activity-update-location').value;
+      const slots = document.getElementById('activity-update-slots').value;
+      const tags = document.getElementById('activity-update-tags').value;
+      const status = document.getElementById('activity-update-status').value;
+      
+      if (title) body.title = title;
+      if (description) body.description = description;
+      if (date) body.date = new Date(date).toISOString();
+      if (location) body.location = location;
+      if (slots) body.slots = parseInt(slots);
+      if (tags) body.tags = tags.split(',').map(t => t.trim()).filter(t => t);
+      if (status) body.status = status;
+      
+      testEndpoint('PUT', '/api/activities/' + id, body, true);
+    }
+
+    function testActivityDelete() {
+      const id = document.getElementById('activity-delete-id').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      if (!confirm('⚠️ WARNING: This will permanently delete the activity. Are you sure?')) return;
+      testEndpoint('DELETE', '/api/activities/' + id, null, true);
+    }
+
+    function testActivityJoin() {
+      const id = document.getElementById('activity-join-id').value;
+      const participants = document.getElementById('activity-join-participants').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      testEndpoint('POST', '/api/activities/' + id + '/join', {participants: parseInt(participants) || 1}, true);
+    }
+
+    function testActivityLeave() {
+      const id = document.getElementById('activity-leave-id').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      testEndpoint('POST', '/api/activities/' + id + '/leave', null, true);
+    }
+
+    function testActivityAttendance() {
+      const id = document.getElementById('activity-attendance-id').value;
+      const userId = document.getElementById('activity-attendance-userId').value;
+      const status = document.getElementById('activity-attendance-status').value;
+      if (!id || !userId) {
+        alert('Please provide Activity ID and User ID');
+        return;
+      }
+      testEndpoint('POST', '/api/activities/' + id + '/attendance', {userId, status}, true);
+    }
+
+    function testActivityState() {
+      const id = document.getElementById('activity-state-id').value;
+      const state = document.getElementById('activity-state').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      testEndpoint('POST', '/api/activities/' + id + '/state', {state}, true);
+    }
+
+    // Chat functions
+    function testChatSend() {
+      const message = document.getElementById('chat-message').value;
+      if (!message) {
+        alert('Please provide a message');
+        return;
+      }
+      testEndpoint('POST', '/api/chat', {message}, true);
+    }
+
+    function testChatHistory() {
+      const page = document.getElementById('chat-history-page').value || 1;
+      const limit = document.getElementById('chat-history-limit').value || 20;
+      testEndpoint('GET', '/api/chat/history', null, true, {page, limit});
+    }
+
+    function testChatById() {
+      const id = document.getElementById('chat-id').value;
+      if (!id) {
+        alert('Please provide Chat ID');
+        return;
+      }
+      testEndpoint('GET', '/api/chat/' + id, null, true);
+    }
+
+    // Stats functions
+    function testStatsActivity() {
+      const id = document.getElementById('stats-activity-id').value;
+      if (!id) {
+        alert('Please provide Activity ID');
+        return;
+      }
+      testEndpoint('GET', '/api/stats/activity/' + id, null, true);
+    }
+
+    function testStatsUser() {
+      const id = document.getElementById('stats-user-id').value;
+      if (!id) {
+        alert('Please provide User ID');
+        return;
+      }
+      testEndpoint('GET', '/api/stats/user/' + id, null, true);
+    }
+
+    // Admin functions
+    function testAdminUsers() {
+      const page = document.getElementById('admin-users-page').value || 1;
+      const limit = document.getElementById('admin-users-limit').value || 20;
+      const search = document.getElementById('admin-users-search').value;
+      const role = document.getElementById('admin-users-role').value;
+      
+      const params = {page, limit};
+      if (search) params.search = search;
+      if (role) params.role = role;
+      
+      testEndpoint('GET', '/api/admin/users', null, true, params);
+    }
+
+    function testAdminRole() {
+      const userId = document.getElementById('admin-role-userId').value;
+      const role = document.getElementById('admin-role-role').value;
+      if (!userId) {
+        alert('Please provide User ID');
+        return;
+      }
+      testEndpoint('PUT', '/api/admin/users/' + userId + '/role', {role}, true);
+    }
+
+    function testAdminDelete() {
+      const userId = document.getElementById('admin-delete-userId').value;
+      if (!userId) {
+        alert('Please provide User ID');
+        return;
+      }
+      if (!confirm('⚠️ WARNING: This will permanently delete the user. Are you sure?')) return;
+      testEndpoint('DELETE', '/api/admin/users/' + userId, null, true);
+    }
+
+    function testAdminActivities() {
+      const page = document.getElementById('admin-activities-page').value || 1;
+      const limit = document.getElementById('admin-activities-limit').value || 20;
+      const search = document.getElementById('admin-activities-search').value;
+      const state = document.getElementById('admin-activities-state').value;
+      const status = document.getElementById('admin-activities-status').value;
+      
+      const params = {page, limit};
+      if (search) params.search = search;
+      if (state) params.state = state;
+      if (status) params.status = status;
+      
+      testEndpoint('GET', '/api/admin/activities', null, true, params);
+    }
+
+    // Upload functions
+    function testUploadAvatar() {
+      const url = document.getElementById('upload-avatar-url').value;
+      if (!url) {
+        alert('Please provide Avatar URL');
+        return;
+      }
+      testEndpoint('POST', '/api/upload/avatar', {url}, true);
+    }
+
+    function testUploadMedia() {
+      const activityId = document.getElementById('upload-media-activityId').value;
+      const urlsText = document.getElementById('upload-media-urls').value;
+      if (!activityId || !urlsText) {
+        alert('Please provide Activity ID and Media URLs');
+        return;
+      }
+      const mediaUrls = urlsText.split(/[,\n]/).map(u => u.trim()).filter(u => u);
+      testEndpoint('POST', '/api/upload/activities/' + activityId + '/media', {mediaUrls}, true);
+    }
+  </script>
+</body>
+</html>
+

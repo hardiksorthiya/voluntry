@@ -26,33 +26,44 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { name, email, bio, phone, location, skills, availability, avatarUrl, socials } = req.body;
-    const user = await User.findById(req.user._id);
     
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
+    // Build update object
+    const updateFields = {};
+    
     // Update main user fields
-    if (name) user.name = name;
-    if (email) {
+    if (name !== undefined) updateFields.name = name;
+    if (email !== undefined) {
       // Check if email is already taken by another user
       const existingUser = await User.findOne({ email, _id: { $ne: req.user._id } });
       if (existingUser) {
         return res.status(409).json({ message: "Email already in use" });
       }
-      user.email = email;
+      updateFields.email = email;
     }
 
-    // Update profile fields
-    if (bio !== undefined) user.profile.bio = bio;
-    if (phone !== undefined) user.profile.phone = phone;
-    if (location !== undefined) user.profile.location = location;
-    if (skills !== undefined) user.profile.skills = skills;
-    if (availability !== undefined) user.profile.availability = availability;
-    if (avatarUrl !== undefined) user.profile.avatarUrl = avatarUrl;
-    if (socials !== undefined) user.profile.socials = socials;
+    // Build profile update object
+    const profileUpdate = {};
+    if (bio !== undefined) profileUpdate['profile.bio'] = bio;
+    if (phone !== undefined) profileUpdate['profile.phone'] = phone;
+    if (location !== undefined) profileUpdate['profile.location'] = location;
+    if (skills !== undefined) profileUpdate['profile.skills'] = skills;
+    if (availability !== undefined) profileUpdate['profile.availability'] = availability;
+    if (avatarUrl !== undefined) profileUpdate['profile.avatarUrl'] = avatarUrl;
+    if (socials !== undefined) profileUpdate['profile.socials'] = socials;
 
-    await user.save();
+    // Merge all updates
+    const finalUpdate = { ...updateFields, ...profileUpdate };
+
+    // Use findByIdAndUpdate with $set to ensure nested documents are saved
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: finalUpdate },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     return res.json({
       message: "Profile updated successfully",

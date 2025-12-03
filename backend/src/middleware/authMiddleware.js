@@ -33,3 +33,12 @@ export const requireAdmin = (req, res, next) => {
   return next();
 };
 
+export const requireManager = (req, res, next) => {
+  if (req.user?.role !== "admin" && req.user?.role !== "manager") {
+    return res.status(403).json({ message: "Manager or admin access required" });
+  }
+  return next();
+};
+
+export const requireAdminOrManager = requireManager;
+

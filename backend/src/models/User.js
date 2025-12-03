@@ -54,8 +54,12 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["volunteer", "admin"],
-      default: "volunteer",
+      enum: ["user", "manager", "admin", "volunteer"], // Keep "volunteer" for backward compatibility
+      default: "user",
+    },
+    refreshToken: {
+      type: String,
+      select: false,
     },
     profile: profileSchema,
     stats: statsSchema,
@@ -70,6 +74,24 @@ userSchema.pre("save", async function hashPassword() {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Initialize profile and stats if they don't exist (for backward compatibility)
+userSchema.pre("save", function initializeSubdocuments() {
+  if (!this.profile) {
+    this.profile = {};
+  }
+  if (!this.stats) {
+    this.stats = {
+      hoursContributed: 0,
+      eventsCompleted: 0,
+      impactPoints: 0,
+    };
+  }
+  // Migrate "volunteer" role to "user"
+  if (this.role === "volunteer") {
+    this.role = "user";
+  }
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidate) {
