@@ -6,7 +6,8 @@ import { Platform } from "react-native";
 // Example: http://192.168.1.100:4000/api
 const getApiUrl = () => {
   // HARDCODED IP for your network - change this if your IP changes
-  const HARDCODED_IP = "192.168.1.3";
+  // Current IP detected: 192.168.1.4
+  const HARDCODED_IP = "192.168.1.4";
   const API_URL = `http://${HARDCODED_IP}:4000/api`;
   
   // If environment variable is set, use it (highest priority)
@@ -82,8 +83,12 @@ API.interceptors.response.use(
       console.error('Full URL:', error.config?.baseURL + error.config?.url);
       console.error('Error:', error.message);
       
+      // Extract IP from baseURL for error message
+      const ipMatch = baseURL.match(/http:\/\/([\d.]+):/);
+      const serverIP = ipMatch ? ipMatch[1] : '192.168.1.4';
+      
       return Promise.reject({
-        message: `Network error. Cannot reach server at ${baseURL}. Please check:\n1. Backend is running\n2. Phone and PC on same network\n3. Test: http://192.168.1.3:4000/health from phone browser`,
+        message: `Network error. Cannot reach server at ${baseURL}.\n\nPlease check:\n1. Backend is running (cd backend && npm start)\n2. Phone and PC on same WiFi network\n3. Test from phone browser: http://${serverIP}:4000/health\n4. Check Windows Firewall allows Node.js\n5. If IP changed, update HARDCODED_IP in src/api.js`,
         status: 0,
         url: baseURL,
       });
