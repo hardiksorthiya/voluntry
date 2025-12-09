@@ -10,9 +10,6 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ProfileUpdateScreen from './src/screens/ProfileUpdateScreen';
-import CreateActivityScreen from './src/screens/CreateActivityScreen';
-import ActivitiesScreen from './src/screens/ActivitiesScreen';
-import PlaceholderScreen from './src/screens/PlaceholderScreen';
 import API, { setToken } from './src/api';
 
 const Stack = createNativeStackNavigator();
@@ -100,25 +97,6 @@ export default function App() {
                   />
                 )}
               </Stack.Screen>
-              <Stack.Screen name="Activities">
-                {(props) => (
-                  <ActivitiesScreen {...props} route={{ params: { user } }} />
-                )}
-              </Stack.Screen>
-              <Stack.Screen name="CreateActivity">
-                {(props) => (
-                  <CreateActivityScreen {...props} />
-                )}
-              </Stack.Screen>
-              <Stack.Screen name="Chat">
-                {(props) => (
-                  <PlaceholderScreen
-                    {...props}
-                    title="AI Chat"
-                    description="Chat with AI volunteer coach"
-                  />
-                )}
-              </Stack.Screen>
               <Stack.Screen name="Profile">
                 {(props) => (
                   <ProfileScreen
@@ -133,15 +111,6 @@ export default function App() {
                 options={{ presentation: 'modal' }}
               >
                 {(props) => <ProfileUpdateScreen {...props} />}
-              </Stack.Screen>
-              <Stack.Screen name="ActivityDetail">
-                {(props) => (
-                  <PlaceholderScreen
-                    {...props}
-                    title="Activity Details"
-                    description="View activity details"
-                  />
-                )}
               </Stack.Screen>
             </>
           ) : (

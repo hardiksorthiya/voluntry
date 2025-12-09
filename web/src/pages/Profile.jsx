@@ -16,13 +16,15 @@ const Profile = () => {
 useEffect(() => {
   const fetchProfile = async () => {
     try {
-      const { data } = await client.get("/profile");
+      const { data } = await client.get("/users/me");
       setProfile({
-        bio: data.profile?.bio ?? "",
-        skills: data.profile?.skills?.join(", ") ?? "",
-        availability: data.profile?.availability ?? "flexible",
-        location: data.profile?.location ?? "",
-        avatarUrl: data.profile?.avatarUrl ?? "",
+        bio: data.user?.profile_bio ?? "",
+        skills: Array.isArray(data.user?.profile_skills) 
+          ? data.user.profile_skills.join(", ") 
+          : (data.user?.profile_skills || ""),
+        availability: data.user?.profile_availability ?? "flexible",
+        location: data.user?.profile_location ?? "",
+        avatarUrl: data.user?.profile_avatarUrl ?? "",
       });
     } catch (error) {
       setStatus(error.response?.data?.message ?? "Failed to load profile");
@@ -34,7 +36,7 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   try {
-    await client.put("/profile", {
+    await client.put("/users/me", {
       ...profile,
       skills: profile.skills
         .split(",")
@@ -49,7 +51,7 @@ useEffect(() => {
 
   const handleDelete = async () => {
   try {
-    await client.delete("/profile");
+    await client.delete("/users/me");
     setStatus("Profile deleted");
   } catch (error) {
     setStatus(error.response?.data?.message ?? "Delete failed");

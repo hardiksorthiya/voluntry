@@ -4,8 +4,6 @@ import client from "../api/client";
 const useVolunteerStore = create((set, get) => ({
   user: null,
   stats: null,
-  activities: [],
-  chatHistory: [],
   loading: false,
   error: null,
 
@@ -13,12 +11,12 @@ const useVolunteerStore = create((set, get) => ({
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const { data } = await client.get("/profile");
+      const { data } = await client.get("/users/me");
       set({
         user: {
-          id: data._id,
-          name: data.name,
-          email: data.email,
+          id: data.user?.id || data.user?._id,
+          name: data.user?.name,
+          email: data.user?.email,
         },
       });
     } catch (error) {
@@ -46,7 +44,7 @@ const useVolunteerStore = create((set, get) => ({
   async signup(payload) {
     set({ loading: true, error: null });
     try {
-      const { data } = await client.post("/auth/signup", payload);
+      const { data } = await client.post("/auth/register", payload);
       localStorage.setItem("token", data.token);
       set({ user: data.user, loading: false });
     } catch (error) {
@@ -57,58 +55,21 @@ const useVolunteerStore = create((set, get) => ({
 
   logout() {
     localStorage.removeItem("token");
-    set({ user: null, stats: null, activities: [], chatHistory: [] });
+    set({ user: null, stats: null });
   },
 
   async fetchDashboard() {
     try {
-      const [{ data }, { data: activities }] = await Promise.all([
-        client.get("/stats/dashboard"),
-        client.get("/volunteer"),
-      ]);
+      const { data } = await client.get("/stats/dashboard");
       set({
         stats: data.stats ?? {
           hoursContributed: 0,
           eventsCompleted: 0,
           impactPoints: 0,
         },
-        activities,
       });
     } catch (error) {
       set({ error: error.response?.data?.message ?? "Failed to load dashboard" });
-    }
-  },
-
-  async saveActivity(activity) {
-    const endpoint = activity._id ? `/volunteer/${activity._id}` : "/volunteer";
-    const method = activity._id ? "put" : "post";
-    const { data } = await client[method](endpoint, activity);
-    await get().fetchDashboard();
-    return data;
-  },
-
-  async deleteActivity(id) {
-    await client.delete(`/volunteer/${id}`);
-    await get().fetchDashboard();
-  },
-
-  async loadChatHistory() {
-    try {
-      const { data } = await client.get("/chat/history");
-      set({ chatHistory: data });
-    } catch (error) {
-      set({ error: error.response?.data?.message ?? "Failed to load chat" });
-    }
-  },
-
-  async sendChatMessage(content) {
-    try {
-      const { data } = await client.post("/chat", { content });
-      set((state) => ({
-        chatHistory: [...state.chatHistory, data.userMessage, data.aiMessage],
-      }));
-    } catch (error) {
-      set({ error: error.response?.data?.message ?? "Failed to send message" });
     }
   },
 }));

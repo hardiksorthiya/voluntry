@@ -1,72 +1,66 @@
-import mongoose from "mongoose";
+import mysql from "mysql2/promise";
+
+let pool = null;
 
 const connectDB = async (retries = 3, delay = 2000) => {
-  const uri = process.env.MONGO_URI ?? "mongodb://127.0.0.1:27017/voluntry";
-  if (!process.env.MONGO_URI) {
+  const config = {
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "",
+    database: process.env.DB_NAME || "voluntry",
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
+  };
+
+  if (!process.env.DB_HOST && !process.env.DB_USER) {
     console.warn(
-      "⚠️  MONGO_URI missing; falling back to local mongodb://127.0.0.1:27017/voluntry"
+      "⚠️  Database config missing; falling back to defaults (localhost/root)"
     );
   }
 
-  // Set up connection event handlers
-  mongoose.connection.on("connected", () => {
-    console.log("✅ MongoDB connected successfully");
-  });
-
-  mongoose.connection.on("error", (err) => {
-    console.error("❌ MongoDB connection error:", err.message);
-  });
-
-  mongoose.connection.on("disconnected", () => {
-    console.warn("⚠️  MongoDB disconnected");
-  });
-
-  // Handle process termination
-  process.on("SIGINT", async () => {
-    await mongoose.connection.close();
-    console.log("MongoDB connection closed due to app termination");
-    process.exit(0);
-  });
-
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 10000, // Increased to 10 seconds
-        socketTimeoutMS: 45000,
-        connectTimeoutMS: 10000,
-        maxPoolSize: 10,
-        retryWrites: true,
-        w: "majority",
-      });
-      console.log("✅ MongoDB connected");
-      return; // Success, exit the function
+      pool = mysql.createPool(config);
+      
+      // Test connection
+      const connection = await pool.getConnection();
+      await connection.ping();
+      connection.release();
+      
+      console.log("✅ MySQL connected successfully");
+      console.log(`   Database: ${config.database}`);
+      console.log(`   Host: ${config.host}`);
+      
+      return pool;
     } catch (error) {
       const isLastAttempt = attempt === retries;
       
-      console.error(`❌ MongoDB connection attempt ${attempt}/${retries} failed:`, error.message);
+      console.error(`❌ MySQL connection attempt ${attempt}/${retries} failed:`, error.message);
       
       // Provide helpful error messages
-      if (error.message.includes("IP") || error.message.includes("whitelist")) {
-        console.error("\n📋 IP Whitelist Issue Detected:");
-        console.error("   → Your IP address may not be whitelisted in MongoDB Atlas");
-        console.error("   → Go to: https://cloud.mongodb.com → Network Access → Add IP Address");
-        console.error("   → Or use 0.0.0.0/0 to allow all IPs (for development only)\n");
-      } else if (error.message.includes("authentication")) {
-        console.error("\n🔐 Authentication Issue Detected:");
-        console.error("   → Check your MongoDB username and password in MONGO_URI");
-        console.error("   → Format: mongodb+srv://username:password@cluster.mongodb.net/dbname\n");
-      } else if (error.message.includes("ENOTFOUND") || error.message.includes("DNS")) {
-        console.error("\n🌐 DNS/Network Issue Detected:");
-        console.error("   → Check your internet connection");
-        console.error("   → Verify the MongoDB cluster hostname in MONGO_URI\n");
+      if (error.code === "ECONNREFUSED") {
+        console.error("\n📋 Connection Refused:");
+        console.error("   → Make sure MySQL server is running");
+        console.error("   → Check host and port in DB_HOST\n");
+      } else if (error.code === "ER_ACCESS_DENIED_ERROR") {
+        console.error("\n🔐 Authentication Issue:");
+        console.error("   → Check DB_USER and DB_PASSWORD in .env file");
+        console.error("   → Verify MySQL user has proper permissions\n");
+      } else if (error.code === "ER_BAD_DB_ERROR") {
+        console.error("\n📦 Database Not Found:");
+        console.error(`   → Database "${config.database}" does not exist`);
+        console.error("   → Create it first: CREATE DATABASE voluntry;\n");
       }
 
       if (isLastAttempt) {
         console.error("\n💡 Troubleshooting Tips:");
-        console.error("   1. Verify MONGO_URI in your .env file");
-        console.error("   2. Check MongoDB Atlas Network Access settings");
-        console.error("   3. Ensure MongoDB Atlas cluster is running");
-        console.error("   4. For local MongoDB: ensure the service is running\n");
+        console.error("   1. Verify MySQL server is running");
+        console.error("   2. Check DB_HOST, DB_USER, DB_PASSWORD, DB_NAME in .env");
+        console.error("   3. Create database: CREATE DATABASE voluntry;");
+        console.error("   4. Ensure MySQL user has proper permissions\n");
         process.exit(1);
       }
 
@@ -78,5 +72,14 @@ const connectDB = async (retries = 3, delay = 2000) => {
   }
 };
 
-export default connectDB;
+// Handle process termination
+process.on("SIGINT", async () => {
+  if (pool) {
+    await pool.end();
+    console.log("MySQL connection pool closed due to app termination");
+  }
+  process.exit(0);
+});
 
+export { pool };
+export default connectDB;

@@ -14,7 +14,6 @@ const Navbar = () => {
       <div className="nav-links">
         <Link to="/">Dashboard</Link>
         <Link to="/profile">Profile</Link>
-        <Link to="/chat">AI Chat</Link>
       </div>
       <div className="nav-actions">
         <span>{user?.name}</span>

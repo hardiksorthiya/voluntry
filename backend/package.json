@@ -7,12 +7,17 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "lint": "echo \"No linter configured\""
+    "lint": "echo \"No linter configured\"",
+    "setup-db": "node run-schema.js",
+    "migrate": "npx knex migrate:latest",
+    "migrate:rollback": "npx knex migrate:rollback",
+    "migrate:status": "npx knex migrate:status",
+    "migrate:make": "npx knex migrate:make"
   },
   "keywords": [
     "volunteer",
     "express",
-    "mongo"
+    "mysql"
   ],
   "author": "",
   "license": "MIT",
@@ -22,7 +27,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^9.0.0",
+    "knex": "^3.1.0",
+    "mysql2": "^3.11.5",
     "openai": "^6.9.1"
   },
   "devDependencies": {

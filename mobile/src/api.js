@@ -6,8 +6,8 @@ import { Platform } from "react-native";
 // Example: http://192.168.1.100:4000/api
 const getApiUrl = () => {
   // HARDCODED IP for your network - change this if your IP changes
-  // Current IP detected: 192.168.1.4
-  const HARDCODED_IP = "192.168.1.4";
+  // Current IP detected: 192.168.1.5 (Ethernet)
+  const HARDCODED_IP = "192.168.1.5";
   const API_URL = `http://${HARDCODED_IP}:4000/api`;
   
   // If environment variable is set, use it (highest priority)

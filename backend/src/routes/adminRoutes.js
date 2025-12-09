@@ -3,7 +3,6 @@ import {
   listUsers,
   changeUserRole,
   removeUser,
-  listActivities,
 } from "../controllers/adminController.js";
 import { requireAuth, requireAdmin } from "../middleware/authMiddleware.js";
 
@@ -17,9 +16,6 @@ router.use(requireAdmin);
 router.get("/users", listUsers);
 router.put("/users/:id/role", changeUserRole);
 router.delete("/users/:id", removeUser);
-
-// Activity management
-router.get("/activities", listActivities);
 
 export default router;
 

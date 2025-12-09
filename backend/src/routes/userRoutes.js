@@ -6,7 +6,6 @@ import {
   getUserById,
   listUsers,
 } from "../controllers/userController.js";
-import { getUserActivities } from "../controllers/activityController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
@@ -23,10 +22,7 @@ router.delete("/me", requireAuth, deleteCurrentUser);
 // GET /users - List users (authenticated users only)
 router.get("/", requireAuth, listUsers);
 
-// GET /users/:id/activities - Get activities for a user (must come before /:id)
-router.get("/:id/activities", requireAuth, getUserActivities);
-
-// GET /users/:id - Get public view of user profile (must be last)
+// GET /users/:id - Get public view of user profile
 router.get("/:id", requireAuth, getUserById);
 
 export default router;

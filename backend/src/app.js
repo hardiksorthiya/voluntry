@@ -5,9 +5,6 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
-import chatRoutes from "./routes/chatRoutes.js";
-import activityRoutes from "./routes/activityRoutes.js";
-import volunteerRoutes from "./routes/volunteerRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
@@ -24,7 +21,7 @@ app.get("/health", (_req, res) =>
   res.json({ status: "ok", timestamp: new Date().toISOString() })
 );
 
-// API Documentation Route - Interactive HTML Page
+// API Documentation Route - Authentication APIs Only
 app.get("/docs", async (_req, res) => {
   const baseUrl = `http://localhost:${process.env.PORT || 4000}`;
   try {
@@ -529,9 +526,6 @@ app.get("/docs", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoutes); // Keep for backward compatibility
-app.use("/api/chat", chatRoutes);
-app.use("/api/activities", activityRoutes);
-app.use("/api/volunteer", volunteerRoutes); // Keep for backward compatibility
 app.use("/api/stats", statsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);

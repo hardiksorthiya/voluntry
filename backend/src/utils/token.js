@@ -12,7 +12,7 @@ const getSecret = () => {
 export const signToken = (user) => {
   return jwt.sign(
     {
-      sub: user._id.toString(),
+      sub: user.id.toString(),
       email: user.email,
       role: user.role,
     },
@@ -24,7 +24,7 @@ export const signToken = (user) => {
 export const signRefreshToken = (user) => {
   return jwt.sign(
     {
-      sub: user._id.toString(),
+      sub: user.id.toString(),
       type: "refresh",
     },
     getSecret(),

@@ -1,19 +1,17 @@
 import User from "../models/User.js";
-import ChatMessage from "../models/ChatMessage.js";
-import VolunteerActivity from "../models/VolunteerActivity.js";
-import Activity from "../models/Activity.js";
-import Attendance from "../models/Attendance.js";
+import { pool } from "../config/db.js";
 
 // GET /users/me - Get current user profile
 export const getCurrentUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const userId = req.user.id;
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     return res.status(200).json({
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -31,29 +29,30 @@ export const getCurrentUser = async (req, res) => {
 // PUT /users/me - Update current user profile (partial update)
 export const updateCurrentUser = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { name, phone, bio, location, skills, availability, avatarUrl, socials } = req.body;
     
     // Build update object
-    const updateFields = {};
+    const updateData = {};
     
     // Update main user fields
-    if (name !== undefined) updateFields.name = name;
+    if (name !== undefined) updateData.name = name;
 
-    // Build profile update object using dot notation
-    if (phone !== undefined) updateFields['profile.phone'] = phone;
-    if (bio !== undefined) updateFields['profile.bio'] = bio;
-    if (location !== undefined) updateFields['profile.location'] = location;
-    if (skills !== undefined) updateFields['profile.skills'] = skills;
-    if (availability !== undefined) updateFields['profile.availability'] = availability;
-    if (avatarUrl !== undefined) updateFields['profile.avatarUrl'] = avatarUrl;
-    if (socials !== undefined) updateFields['profile.socials'] = socials;
+    // Build profile update object
+    if (phone !== undefined || bio !== undefined || location !== undefined || 
+        skills !== undefined || availability !== undefined || avatarUrl !== undefined || 
+        socials !== undefined) {
+      updateData.profile = {};
+      if (phone !== undefined) updateData.profile.phone = phone;
+      if (bio !== undefined) updateData.profile.bio = bio;
+      if (location !== undefined) updateData.profile.location = location;
+      if (skills !== undefined) updateData.profile.skills = skills;
+      if (availability !== undefined) updateData.profile.availability = availability;
+      if (avatarUrl !== undefined) updateData.profile.avatarUrl = avatarUrl;
+      if (socials !== undefined) updateData.profile.socials = socials;
+    }
 
-    // Use findByIdAndUpdate with $set to ensure nested documents are saved
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: updateFields },
-      { new: true, runValidators: true }
-    );
+    const user = await User.update(userId, updateData);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -61,7 +60,7 @@ export const updateCurrentUser = async (req, res) => {
 
     return res.status(200).json({
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -77,24 +76,26 @@ export const updateCurrentUser = async (req, res) => {
 // DELETE /users/me - Delete current user (soft or hard delete)
 export const deleteCurrentUser = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
+    const connection = await pool.getConnection();
 
-    // Delete all related data
-    await Promise.all([
-      ChatMessage.deleteMany({ user: userId }),
-      VolunteerActivity.deleteMany({ user: userId }),
-      Activity.deleteMany({ owner: userId }),
-      Activity.updateMany(
-        { "participants.user": userId },
-        { $pull: { participants: { user: userId } } }
-      ),
-      Attendance.deleteMany({ user: userId }),
-      User.findByIdAndDelete(userId),
-    ]);
+    try {
+      await connection.beginTransaction();
 
-    return res.status(200).json({ 
-      message: "User and all associated data deleted successfully" 
-    });
+      // Delete all related data (foreign keys will handle cascading)
+      await connection.execute("DELETE FROM users WHERE id = ?", [userId]);
+
+      await connection.commit();
+      
+      return res.status(200).json({ 
+        message: "User and all associated data deleted successfully" 
+      });
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   } catch (error) {
     return res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
@@ -113,7 +114,7 @@ export const getUserById = async (req, res) => {
     // Return public view (no sensitive fields)
     return res.status(200).json({
       userPublic: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         profile: {
           bio: user.profile?.bio,
@@ -139,24 +140,16 @@ export const listUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
 
-    const [users, total] = await Promise.all([
-      User.find()
-        .select("-password -refreshToken")
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 }),
-      User.countDocuments(),
-    ]);
+    const result = await User.findAll({ page, limit });
 
     return res.status(200).json({
-      users,
+      users: result.users,
       meta: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        pages: result.pages,
       },
     });
   } catch (error) {
