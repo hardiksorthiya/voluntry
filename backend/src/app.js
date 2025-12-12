@@ -9,6 +9,7 @@ import statsRoutes from "./routes/statsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import setupRoutes from "./routes/setupRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 
 dotenv.config();
 await connectDB();
@@ -530,6 +531,8 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/setup", setupRoutes); // Setup routes (for initial admin creation)
+app.use("/api/chat", chatRoutes);
+console.log("✅ Chat routes registered at /api/chat");
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

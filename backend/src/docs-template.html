@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voluntry API Documentation - Authentication</title>
+  <title>Voluntry API Documentation</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -165,7 +165,7 @@
   <div class="container">
     <div class="header">
       <h1>🚀 Voluntry API Documentation</h1>
-      <p>Authentication APIs - Test endpoints directly from this page</p>
+      <p>Test all endpoints directly from this page</p>
     </div>
     <div class="content">
       <div class="token-section">
@@ -255,6 +255,77 @@
           </div>
         </div>
       </div>
+
+      <!-- Chat APIs -->
+      <div class="endpoint-group">
+        <h2>Chat APIs</h2>
+        
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/api/chat</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Send a message to AI chat and get response. Conversation history is automatically maintained.</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="chat-content" placeholder="Your message *" value="How can I help with volunteering?">
+              <input type="text" id="chat-conversation-id" placeholder="Conversation ID (optional - leave empty for new conversation)">
+            </div>
+            <button class="test-btn" onclick="testChatSend()">Send Message</button>
+            <div class="response" id="response-chat"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/chat/history</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get chat history. Optionally filter by conversation ID.</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="history-conversation-id" placeholder="Conversation ID (optional - leave empty for all messages)">
+              <input type="number" id="history-limit" placeholder="Limit (default: 50)" value="50">
+            </div>
+            <button class="test-btn" onclick="testChatHistory()">Get History</button>
+            <div class="response" id="response-chat-history"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/api/chat/conversations</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Get list of all conversations for the current user.</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="number" id="conversations-limit" placeholder="Limit (default: 20)" value="20">
+            </div>
+            <button class="test-btn" onclick="testChatConversations()">Get Conversations</button>
+            <div class="response" id="response-chat-conversations"></div>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span class="path">/api/chat/conversation/:conversationId</span>
+            <span class="auth-badge">Auth Required</span>
+          </div>
+          <div class="description">Delete a specific conversation and all its messages.</div>
+          <div class="test-section">
+            <div class="input-group">
+              <input type="text" id="delete-conversation-id" placeholder="Conversation ID *">
+            </div>
+            <button class="test-btn" onclick="testChatDelete()" style="background: #f93e3e;">Delete Conversation</button>
+            <div class="response" id="response-chat-delete"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -262,7 +333,38 @@
     const baseUrl = 'BASE_URL_PLACEHOLDER';
     
     async function testEndpoint(method, endpoint, body, needsAuth = false) {
-      const responseId = 'response-' + endpoint.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      // Map endpoints to response IDs
+      const responseIdMap = {
+        '/health': 'response-health',
+        '/api/auth/register': 'response-register',
+        '/api/auth/login': 'response-login',
+        '/api/auth/refresh': 'response-refresh',
+        '/api/auth/logout': 'response-logout',
+        '/api/chat': 'response-chat',
+        '/api/chat/history': 'response-chat-history',
+        '/api/chat/conversations': 'response-chat-conversations',
+      };
+      
+      // Extract base endpoint for ID mapping
+      let baseEndpoint = endpoint.split('?')[0]; // Remove query params
+      
+      // Handle delete conversation endpoint
+      if (baseEndpoint.startsWith('/api/chat/conversation/')) {
+        baseEndpoint = '/api/chat/conversation';
+      }
+      
+      let responseId = responseIdMap[baseEndpoint];
+      
+      // Fallback: generate ID from endpoint
+      if (!responseId) {
+        responseId = 'response-' + baseEndpoint.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      }
+      
+      // Special handling for delete conversation
+      if (endpoint.includes('/api/chat/conversation/') && method === 'DELETE') {
+        responseId = 'response-chat-delete';
+      }
+      
       let responseDiv = document.getElementById(responseId);
       
       if (!responseDiv) {
@@ -350,6 +452,58 @@
         return;
       }
       testEndpoint('POST', '/api/auth/refresh', {refreshToken});
+    }
+
+    function testChatSend() {
+      const content = document.getElementById('chat-content').value;
+      const conversationId = document.getElementById('chat-conversation-id').value;
+      if (!content) {
+        alert('Please enter a message');
+        return;
+      }
+      const body = { content };
+      if (conversationId) {
+        body.conversationId = conversationId;
+      }
+      testEndpoint('POST', '/api/chat', body, true);
+    }
+
+    function testChatHistory() {
+      const conversationId = document.getElementById('history-conversation-id').value;
+      const limit = document.getElementById('history-limit').value;
+      let endpoint = '/api/chat/history';
+      const params = [];
+      if (conversationId) {
+        params.push(`conversationId=${encodeURIComponent(conversationId)}`);
+      }
+      if (limit) {
+        params.push(`limit=${encodeURIComponent(limit)}`);
+      }
+      if (params.length > 0) {
+        endpoint += '?' + params.join('&');
+      }
+      testEndpoint('GET', endpoint, null, true);
+    }
+
+    function testChatConversations() {
+      const limit = document.getElementById('conversations-limit').value;
+      let endpoint = '/api/chat/conversations';
+      if (limit) {
+        endpoint += `?limit=${encodeURIComponent(limit)}`;
+      }
+      testEndpoint('GET', endpoint, null, true);
+    }
+
+    function testChatDelete() {
+      const conversationId = document.getElementById('delete-conversation-id').value;
+      if (!conversationId) {
+        alert('Please enter conversation ID');
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+        return;
+      }
+      testEndpoint('DELETE', `/api/chat/conversation/${encodeURIComponent(conversationId)}`, null, true);
     }
   </script>
 </body>

@@ -34,9 +34,22 @@ const useVolunteerStore = create((set, get) => ({
     try {
       const { data } = await client.post("/auth/login", credentials);
       localStorage.setItem("token", data.token);
-      set({ user: data.user, loading: false });
+      set({ user: data.user, loading: false, error: null });
     } catch (error) {
-      set({ error: error.response?.data?.message ?? "Login failed", loading: false });
+      let errorMessage = "Login failed";
+      
+      if (error.response) {
+        // Server responded with error status
+        errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        // Request made but no response received
+        errorMessage = "Unable to connect to server. Please check if the backend is running.";
+      } else {
+        // Error setting up request
+        errorMessage = error.message || "An unexpected error occurred";
+      }
+      
+      set({ error: errorMessage, loading: false });
       throw error;
     }
   },
@@ -46,9 +59,22 @@ const useVolunteerStore = create((set, get) => ({
     try {
       const { data } = await client.post("/auth/register", payload);
       localStorage.setItem("token", data.token);
-      set({ user: data.user, loading: false });
+      set({ user: data.user, loading: false, error: null });
     } catch (error) {
-      set({ error: error.response?.data?.message ?? "Signup failed", loading: false });
+      let errorMessage = "Signup failed";
+      
+      if (error.response) {
+        // Server responded with error status
+        errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        // Request made but no response received
+        errorMessage = "Unable to connect to server. Please check if the backend is running.";
+      } else {
+        // Error setting up request
+        errorMessage = error.message || "An unexpected error occurred";
+      }
+      
+      set({ error: errorMessage, loading: false });
       throw error;
     }
   },

@@ -13,7 +13,8 @@ const Signup = () => {
       await signup(form);
       navigate("/");
     } catch (error) {
-      console.error(error);
+      // Error is already handled and displayed via the store's error state
+      console.error("Signup error:", error);
     }
   };
 
