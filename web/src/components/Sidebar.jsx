@@ -20,7 +20,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <span className="logo-icon">V+</span>
-          {!collapsed && <span className="logo-text">Voluntry</span>}
+          {!collapsed && <span className="logo-text">volunteer connect</span>}
         </div>
       </div>
 

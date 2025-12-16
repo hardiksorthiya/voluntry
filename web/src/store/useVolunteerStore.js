@@ -80,8 +80,10 @@ const useVolunteerStore = create((set, get) => ({
   },
 
   logout() {
+    // Clear token first
     localStorage.removeItem("token");
-    set({ user: null, stats: null });
+    // Clear all state synchronously
+    set({ user: null, stats: null, error: null, loading: false });
   },
 
   async fetchDashboard() {

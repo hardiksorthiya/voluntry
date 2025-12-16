@@ -54,7 +54,10 @@ const Layout = ({ children }) => {
                 <span className="dropdown-icon">▼</span>
               </div>
               {profileDropdownOpen && (
-                <div className="profile-dropdown">
+                <div 
+                  className="profile-dropdown"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button 
                     className="dropdown-item"
                     onClick={() => {
@@ -76,7 +79,10 @@ const Layout = ({ children }) => {
                   <div className="dropdown-divider"></div>
                   <button 
                     className="dropdown-item logout"
-                    onClick={handleLogout}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLogout();
+                    }}
                   >
                     Logout
                   </button>
@@ -87,12 +93,7 @@ const Layout = ({ children }) => {
         </header>
         <main className="content-area">{children}</main>
       </div>
-      {profileDropdownOpen && (
-        <div
-          className="dropdown-overlay"
-          onClick={() => setProfileDropdownOpen(false)}
-        />
-      )}
+      
     </div>
   );
 };

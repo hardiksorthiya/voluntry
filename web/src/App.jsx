@@ -74,11 +74,23 @@ const App = () => {
         />
         <Route
           path="/login"
-          element={user ? <Navigate to="/" replace /> : <Login />}
+          element={
+            user && localStorage.getItem("token") ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Login />
+            )
+          }
         />
         <Route
           path="/signup"
-          element={user ? <Navigate to="/" replace /> : <Signup />}
+          element={
+            user && localStorage.getItem("token") ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Signup />
+            )
+          }
         />
       </Routes>
     </div>
