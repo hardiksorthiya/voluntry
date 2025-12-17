@@ -20,7 +20,7 @@ const Signup = () => {
 
   return (
     <div className="auth-card">
-      <h2>Join Voluntry</h2>
+      <h2>Join Volunteer Connect</h2>
       <p>Create an account to track your volunteer journey.</p>
       <form onSubmit={handleSubmit} className="auth-form">
         <input
